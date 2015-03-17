@@ -52,3 +52,32 @@
 
 (symmetrize-body-parts asym-hobbit-body-parts)
 
+(defn better-symmetrize-body-parts
+  "Expects a seq of maps which have a :name and :size"
+  [asym-body-parts]
+  (reduce (fn [final-body-parts part]
+            (let [final-body-parts (conj final-body-parts part)]
+              (if (needs-matching-part? part)
+                (conj final-body-parts (make-matching-part part))
+                final-body-parts)))
+          []
+          asym-body-parts))
+
+(defn hit
+  [asym-body-parts]
+  (let [sym-parts (better-symmetrize-body-parts asym-body-parts)
+        body-part-size-sum (reduce + 0 (map :size sym-parts))
+        target (inc (rand body-part-size-sum))]
+    (loop [[part & rest] sym-parts
+           accumulated-size (:size part)]
+      (if (> accumulated-size target)
+        part
+        (recur rest (+ accumulated-size (:size part)))))))
+
+(hit asym-hobbit-body-parts)
+
+(defn whack
+  []
+  (:name (hit asym-hobbit-body-parts)))
+
+(whack)
